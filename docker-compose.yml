@@ -8,7 +8,13 @@ x-superset-volumes: &superset-volumes
   - superset-home:/app/superset_home
 
 x-airflow-common: &airflow-common
-  image: ${AIRFLOW_IMAGE_NAME}
+  image: ${AIRFLOW_CUSTOM_IMAGE_NAME:-course-airflow:3.1.7-dbt}
+  pull_policy: never
+  build:
+    context: ./airflow/image
+    dockerfile: Dockerfile
+    args:
+      AIRFLOW_BASE_IMAGE: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.1.7}
   env_file:
     - .env
   environment: &airflow-common-env

@@ -33,6 +33,12 @@ make up-airflow
 
 Open Airflow at <http://localhost:8080>.
 
+Note:
+- Airflow uses a local custom image built from `airflow/image/Dockerfile`.
+- Python dependencies for Airflow tasks (for example `dbt-postgres`) are managed in `airflow/image/requirements.txt`.
+- dbt is installed in an isolated virtualenv inside the image (`/opt/dbt-venv`) to avoid dependency conflicts with Airflow itself.
+- First Airflow startup may take longer while the image is built.
+
 Default Airflow login (from `.env`):
 - username: `airflow`
 - password: `airflow`
