@@ -102,7 +102,7 @@ Key files:
 Planned new files:
 - `etl/airviro/*.py` (pipeline implementation).
 - `sql/warehouse/airviro_schema.sql` (tables/views/dimensions).
-- `docs/etl-airviro.md` (usage + design notes + precipitation sources).
+- `docs/lectures/lecture-04/operations.md` (usage + design notes + precipitation sources).
 
 ## Plan of Work
 
@@ -150,7 +150,7 @@ Planned new files:
 
 - Research notes:
   - Airviro sample query tests and window-limit probing.
-  - Precipitation-source discovery links to be documented in `docs/etl-airviro.md`.
+  - Precipitation-source discovery links to be documented in `docs/lectures/lecture-04/operations.md`.
 
 ## Interfaces and Dependencies
 

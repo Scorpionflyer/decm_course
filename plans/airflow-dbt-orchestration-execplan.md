@@ -141,7 +141,7 @@ Planned new paths:
 - `airflow/dags/airviro_backfill.py`
 - `airflow/image/Dockerfile` (custom image with dbt + ETL deps)
 - `airflow/image/requirements.txt`
-- `docs/airflow-dbt-pipeline.md`
+- `docs/lectures/lecture-05/operations.md`
 
 Environment and services:
 - Shared Postgres service: `postgres` (warehouse DB already provisioned).
@@ -194,7 +194,7 @@ Environment and services:
 - Add Make targets for:
   - dbt local runs (`make dbt-run`, `make dbt-test`);
   - Airflow DAG trigger helpers (`make airflow-trigger-backfill ...`).
-- Update `README.md` and add `docs/airflow-dbt-pipeline.md` with copy-paste workflows.
+- Update `README.md` and add `docs/lectures/lecture-05/operations.md` with copy-paste workflows.
 
 ## Concrete Steps
 
