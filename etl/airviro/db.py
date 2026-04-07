@@ -271,6 +271,7 @@ def upsert_measurements(
             row.source_type,
             row.station_id,
             row.observed_at,
+            row.local_hour_occurrence,
             row.indicator_code,
             row.indicator_name,
             row.value_numeric,
@@ -286,13 +287,14 @@ def upsert_measurements(
       source_type,
       station_id,
       observed_at,
+      local_hour_occurrence,
       indicator_code,
       indicator_name,
       value_numeric,
       source_row_hash
     )
     VALUES %s
-    ON CONFLICT (source_type, station_id, observed_at, indicator_code)
+    ON CONFLICT (source_type, station_id, observed_at, indicator_code, local_hour_occurrence)
     DO UPDATE SET
       indicator_name = EXCLUDED.indicator_name,
       value_numeric = EXCLUDED.value_numeric,

@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: fct_air_quality_hourly
-    description: Long-form hourly air-quality fact keyed by station, date, hour slot, and indicator.
+    description: Long-form hourly air-quality fact keyed by station, date, local clock hour, repeated-hour occurrence, and indicator.
     columns:
       - name: station_key
         tests:
@@ -28,6 +28,9 @@ models:
           - relationships:
               to: ref('dim_time_hour')
               field: hour_key
+      - name: hour_occurrence_in_day
+        tests:
+          - not_null
       - name: observed_at
         tests:
           - not_null

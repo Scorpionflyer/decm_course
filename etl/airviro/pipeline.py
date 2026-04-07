@@ -117,6 +117,7 @@ class MeasurementRow:
     source_type: str
     station_id: int
     observed_at: datetime
+    local_hour_occurrence: int
     indicator_code: str
     indicator_name: str
     value_numeric: float | None
@@ -655,7 +656,8 @@ def parse_monitoring_json(
         preview = "; ".join(parse_errors[:8])
         raise DataQualityError(f"{source.source_type}: {len(parse_errors)} parse errors. {preview}")
 
-    measurements: dict[tuple[str, int, datetime, str], MeasurementRow] = {}
+    measurements: dict[tuple[str, int, datetime, str, int], MeasurementRow] = {}
+    local_hour_occurrences: Counter[tuple[str, int, datetime, str]] = Counter()
     duplicates = 0
     trimmed_from_padding = 0
     trimmed_out_of_window = 0
@@ -684,16 +686,27 @@ def parse_monitoring_json(
             trimmed_from_padding += 1
             continue
 
+        occurrence_key = (
+            source.source_type,
+            source.station_id,
+            row.measured_at,
+            metadata.indicator_code,
+        )
+        local_hour_occurrences[occurrence_key] += 1
+        local_hour_occurrence = local_hour_occurrences[occurrence_key]
+
         source_row_hash = hashlib.sha1(
-            f"{source.source_type}|{source.station_id}|{row.measured_at.isoformat()}|{metadata.indicator_code}|{row.raw_value}".encode(
-                "utf-8"
-            )
+            (
+                f"{source.source_type}|{source.station_id}|{row.measured_at.isoformat()}|"
+                f"{metadata.indicator_code}|{local_hour_occurrence}|{row.raw_value}"
+            ).encode("utf-8")
         ).hexdigest()
 
         record = MeasurementRow(
             source_type=source.source_type,
             station_id=source.station_id,
             observed_at=row.measured_at,
+            local_hour_occurrence=local_hour_occurrence,
             indicator_code=metadata.indicator_code,
             indicator_name=metadata.indicator_name,
             value_numeric=row.value_numeric,
@@ -705,6 +718,7 @@ def parse_monitoring_json(
             record.station_id,
             record.observed_at,
             record.indicator_code,
+            record.local_hour_occurrence,
         )
         if key in measurements:
             duplicates += 1
@@ -935,7 +949,7 @@ def build_source_records(
             }
         )
 
-    all_records: dict[tuple[str, int, datetime, str], MeasurementRow] = {}
+    all_records: dict[tuple[str, int, datetime, str, int], MeasurementRow] = {}
     for index, (window_start, window_end) in enumerate(windows, start=1):
         fetch_window_start, fetch_window_end = build_fetch_window(source, window_start, window_end)
         if progress is not None:
@@ -974,6 +988,7 @@ def build_source_records(
                 record.station_id,
                 record.observed_at,
                 record.indicator_code,
+                record.local_hour_occurrence,
             )
             if key in all_records:
                 cross_window_duplicates += 1

@@ -38,7 +38,7 @@ After this lecture, we should be able to:
 4. Describe the dbt layers `staging -> intermediate -> marts`.
 5. Explain why the Lecture 5 ETL is idempotent and why that matters.
 6. Explain watermark-based incremental loading and backfill.
-7. Explain why the warehouse keeps both the source timestamp and an analytic `hour_key`.
+7. Explain why the warehouse keeps both the source local timestamp and separate clock-hour and repeated-hour fields.
 
 ## System Overview
 
@@ -109,7 +109,7 @@ That overlap is important because the source API can behave strangely around his
 The ETL writes normalized long-form rows into `l5_raw`.
 
 Raw grain:
-- one row per `source_type + station_id + observed_at + indicator_code`
+- one row per `source_type + station_id + observed_at + indicator_code + local_hour_occurrence`
 
 The load is idempotent:
 - rerunning the same logical window should not create duplicate raw measurements
@@ -151,6 +151,8 @@ Airflow ties the steps together:
   `dbt test` makes the modeling layer observable, not just "built".
 - Lightweight DAG files:
   top-level DAG code stays small while shared logic lives in helper modules.
+- Honest time modeling:
+  the source gives local timestamps, so the warehouse models local clock hour and repeated-hour occurrence explicitly instead of inventing UTC precision.
 
 ## Read The Code In This Order
 

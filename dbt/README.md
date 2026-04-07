@@ -85,9 +85,9 @@ This project follows the layered layout recommended in the official dbt structur
 If we are reading the dbt project for the first time, this order works well:
 
 1. `models/staging/ohuseire/stg_ohuseire_measurement.sql`
-   See how raw rows are normalized into one stable source contract.
+   See how raw rows are normalized into one stable source contract with local clock fields.
 2. `models/intermediate/ohuseire/int_air_quality_measurement.sql`
-   See how hourly measurement logic and `hour_key` assignment are prepared.
+   See how local clock hours, repeated-hour occurrences, and DST expectations are prepared.
 3. `models/intermediate/ohuseire/int_pollen_daily.sql`
    Compare the daily pollen path with the hourly air-quality path.
 4. `models/marts/dimensions/`
@@ -102,9 +102,9 @@ If we are reading the dbt project for the first time, this order works well:
 - `stg_ohuseire_measurement`
   Canonical staging view over the raw table.
 - `int_air_quality_measurement`
-  Adds a surrogate `hour_key` for each station, indicator, and day.
+  Adds the true local `hour_key`, repeated-hour occurrence, and DST-aware completeness fields.
 - `fct_air_quality_hourly`
-  Long-form hourly fact at the grain `station x date x hour slot x indicator`.
+  Long-form hourly fact at the grain `station x date x clock hour x hour occurrence x indicator`.
 - `fct_pollen_daily`
   Long-form daily fact at the grain `station x date x indicator`.
 - `v_air_quality_hourly`
@@ -126,7 +126,7 @@ If we are reading the dbt project for the first time, this order works well:
 - Raw ingestion stays long-form so ETL window stitching can deduplicate overlapping fetch windows instead of depending on indicator-array index alignment.
 - Each top-level ETL window is fetched with a small date overlap and trimmed back to the requested window so historical backfills do not lose boundary rows.
 - Presentation views sit on top of facts instead of replacing them.
-- The hourly fact keeps the original `observed_at` timestamp and also stores an analytic `hour_key` so we can discuss daylight saving time edge cases without losing the source timestamp.
+- The raw source timestamp is stored as local Ohuseire time. The warehouse keeps that local timestamp, the true local `hour_key`, and a repeated-hour occurrence counter so DST days stay explainable without pretending the source gave us UTC instants.
 - The project is split into small models so we can read and test one step at a time instead of reverse-engineering one large SQL file.
 
 ## Validation

@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: int_air_quality_measurement
-    description: Air-quality measurements enriched with date keys and a 24-slot teaching hour surrogate.
+    description: Air-quality measurements enriched with local clock-hour keys, repeated-hour occurrence, and DST-aware completeness expectations.
     columns:
       - name: station_key
         tests:
@@ -14,7 +14,15 @@ models:
         tests:
           - not_null
       - name: hour_key
-        description: Zero-based hour slot within a station and indicator day profile.
+        description: Local clock hour extracted from the source timestamp.
+        tests:
+          - not_null
+      - name: hour_occurrence_in_day
+        description: Repeated-hour occurrence within a station, indicator, date, and local clock hour.
+        tests:
+          - not_null
+      - name: slot_sequence_in_day
+        description: Zero-based measurement order within one station, indicator, and date.
         tests:
           - not_null
 
@@ -28,6 +36,9 @@ models:
         tests:
           - not_null
       - name: hour_key
+        tests:
+          - not_null
+      - name: hour_occurrence_in_day
         tests:
           - not_null
 

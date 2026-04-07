@@ -14,7 +14,7 @@ models:
           - unique
 
   - name: dim_time_hour
-    description: 24-slot hour dimension used as the DST-safe teaching surrogate key.
+    description: 24-row local clock-hour dimension keyed by hour number 0..23.
     columns:
       - name: hour_key
         tests:

@@ -140,26 +140,31 @@ dbt layers:
 ## Modeling Notes
 
 - `stg_ohuseire_measurement` is the source-conformed contract over `l5_raw.ohuseire_measurement`.
-- `fct_air_quality_hourly` stays long-form: one row per station, date, hour slot, and indicator.
+- `fct_air_quality_hourly` stays long-form: one row per station, date, local clock hour, repeated-hour occurrence, and indicator.
 - `v_air_quality_hourly` is the wide reporting view built on top of that fact.
 - `dim_station` comes from a seed so the lesson stays reproducible.
-- `dim_time_hour` is a simple 24-row hour-slot dimension keyed by `hour_key`.
+- `dim_time_hour` is a simple 24-row local clock-hour dimension keyed by `hour_key`.
 - The ETL fetches each logical window with one day of overlap on both sides before trimming back to the requested dates. That helps recover boundary rows without index-based timestamp shifts.
 
 ## Daylight Saving Time Note
 
 The warehouse keeps both:
 
-- the original `observed_at` timestamp from the source
-- an analytic `hour_key` that numbers measurements `0..23` within each station, indicator, and day
+- the original local `observed_at` timestamp from the source
+- a local `hour_key` that matches the wall-clock hour `0..23`
+- `hour_occurrence_in_day` to distinguish repeated autumn hours when the source returns them
 
-This lets us discuss repeated or skipped local clock hours without losing the original source timestamp.
+This lets us discuss repeated or skipped local clock hours without renumbering later observations into misleading hour labels.
 
 Useful fact columns for DST discussion:
 
+- `hour_occurrence_in_day`
+- `is_expected_dst_transition_day`
 - `is_complete_day_series`
 - `has_repeated_clock_hour`
+- `has_missing_clock_hour`
 - `has_repeated_or_skipped_clock_hour`
+- `has_unexpected_clock_pattern`
 - `measurements_in_day`
 - `distinct_clock_hours_in_day`
 
